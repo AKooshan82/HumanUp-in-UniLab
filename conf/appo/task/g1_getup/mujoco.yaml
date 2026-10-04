@@ -1,0 +1,22 @@
+# @package _global_
+# G1 getting-up task, ported from HumanUP's g1waist Stage-I recipe
+# (https://github.com/RunpeiDong/HumanUP). Reward weights are a direct
+# port of HumanUP's scales where a matching UniLab reward fn exists, and
+# are an untuned starting point -- watch reward/* in the logger and adjust.
+training:
+  task_name: G1Getup
+  sim_backend: mujoco
+algo:
+  max_iterations: 3000
+  save_interval: 100
+env:
+  control_config:
+    action_scale: 0.5
+reward:
+  scales:
+    getup_height: 5.0
+    orientation: -1.0
+    upright: 2.0
+    pose: -0.05
+    action_rate: -0.1
+  base_height_target: 0.754

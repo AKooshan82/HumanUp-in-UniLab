@@ -1,3 +1,71 @@
+> **This fork adds a humanoid getting-up task to [UniLab](https://github.com/unilabsim/UniLab), ported from [HumanUP](https://github.com/RunpeiDong/HumanUP).**
+> Everything below the line is the original UniLab README.
+
+## G1 getting-up task (HumanUP → UniLab)
+
+<p align="center">
+  <img src="docs/humanup_getup/g1_getup.gif" alt="G1 getting up from a supine pose in MuJoCo" width="360">
+</p>
+
+This branch ports the getting-up task from **HumanUP** ([He, Dong et al., *Learning Getting-Up Policies for Real-World Humanoid Robots*, RSS 2025](https://arxiv.org/abs/2502.12152)) from Isaac Gym into UniLab's MuJoCo backend. It adds two tasks for the Unitree G1:
+
+| Task | Start pose | HumanUP original |
+|---|---|---|
+| `g1_getup` | lying on its back (supine) | `g1waist` |
+| `g1_rollover` | lying face down (prone) | `g1waistroll` |
+
+The GIF shows the `g1_getup` policy after 2,825 APPO iterations: from lying flat, the robot reaches a crouch on its feet in under a second and holds it. **It does not stand fully upright yet.** The `getup_height` reward (+5.0) outweighs the much weaker `pose` penalty (−0.05). HumanUP gates its equivalent pose term on head height, which this port does not do yet.
+
+### Training curves
+
+4096 parallel environments, 2,825 iterations (~278M env steps), about 4.4 hours on one RTX 5090.
+
+<p align="center"><img src="docs/humanup_getup/reward_mean.png" alt="Mean episode reward over training" width="70%"></p>
+<p align="center"><img src="docs/humanup_getup/reward_terms.png" alt="Per-term weighted reward curves" width="95%"></p>
+
+### What was added
+
+- `src/unilab/envs/locomotion/g1/getup.py`: `G1GetupEnv`, shared by both tasks, with its rewards and config
+- `src/unilab/assets/robots/g1/scene_getup.xml`: scene with `supine` / `prone` keyframes taken from HumanUP's fallen poses
+- `conf/appo/task/g1_getup/mujoco.yaml`, `conf/appo/task/g1_rollover/mujoco.yaml`: task configs and reward weights
+- `src/unilab/envs/locomotion/g1/__init__.py`: registers the new classes
+
+### Run it
+
+Built on UniLab commit [`22d735d`](https://github.com/unilabsim/UniLab/commit/22d735d98a7e8d80074a846b853db1f9effd6dc8). UniLab `main` was restructured after that commit, so this port won't apply to it as-is.
+
+```bash
+uv sync
+uv run train --algo appo --task g1_getup --sim mujoco algo.num_envs=4096 algo.max_iterations=3000
+uv run eval  --algo appo --task g1_getup --sim mujoco --render-mode record algo.load_run=-1 training.play_steps=500 training.play_env_num=1
+```
+
+### Differences from HumanUP
+
+This is a port, not a faithful reproduction:
+- no head-height reward (this repo's G1 model has no head body)
+- no torque/energy rewards and no domain randomization
+- only Stage I (getting up); HumanUP's Stage II (slower, smoother motion tracking) is not ported
+- reward weights are a first, untuned attempt
+
+### Credits
+
+- **HumanUP**: Xialin He, Runpei Dong, Zixuan Chen, Saurabh Gupta. Task design, rewards and fallen poses. [Code](https://github.com/RunpeiDong/HumanUP) · [Paper](https://arxiv.org/abs/2502.12152) (Apache-2.0)
+- **UniLab**: the training framework this runs on. [Code](https://github.com/unilabsim/UniLab) · [Paper](https://arxiv.org/abs/2605.30313) (Apache-2.0)
+
+If you use this task, please cite HumanUP:
+
+```bibtex
+@article{humanup25,
+  title={Learning Getting-Up Policies for Real-World Humanoid Robots},
+  author={He, Xialin and Dong, Runpei and Chen, Zixuan and Gupta, Saurabh},
+  journal={arXiv preprint arXiv:2502.12152},
+  year={2025}
+}
+```
+
+---
+
 <h1 align="center"> UniLab </h1>
 
 <h3 align="center">

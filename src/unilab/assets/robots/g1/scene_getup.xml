@@ -1,0 +1,112 @@
+<mujoco model="g1_29dof getup scene">
+  <include file="g1.xml"/>
+
+  <statistic center="1 -0.8 1.1" extent=".35"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.1 0.1 0.1" specular="0.9 0.9 0.9"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="140" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+      markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+  </worldbody>
+
+  <sensor>
+    <contact name="left_foot_contact_0" geom1="floor" geom2="left_foot_contact_0_geom" data="found" num="1" reduce="mindist"/>
+    <contact name="left_foot_contact_1" geom1="floor" geom2="left_foot_contact_1_geom" data="found" num="1" reduce="mindist"/>
+    <contact name="left_foot_contact_2" geom1="floor" geom2="left_foot_contact_2_geom" data="found" num="1" reduce="mindist"/>
+    <contact name="left_foot_contact_3" geom1="floor" geom2="left_foot_contact_3_geom" data="found" num="1" reduce="mindist"/>
+    <contact name="right_foot_contact_0" geom1="floor" geom2="right_foot_contact_0_geom" data="found" num="1" reduce="mindist"/>
+    <contact name="right_foot_contact_1" geom1="floor" geom2="right_foot_contact_1_geom" data="found" num="1" reduce="mindist"/>
+    <contact name="right_foot_contact_2" geom1="floor" geom2="right_foot_contact_2_geom" data="found" num="1" reduce="mindist"/>
+    <contact name="right_foot_contact_3" geom1="floor" geom2="right_foot_contact_3_geom" data="found" num="1" reduce="mindist"/>
+  </sensor>
+
+  <keyframe>
+    <!--
+      "stand" is required by G1BaseEnv._keyframe_name: G1GetupEnv still reads
+      default_angles (the PD target the policy's actions are added to, per
+      LocomotionBaseEnv.apply_action) from this keyframe, independent of the
+      pose an episode actually resets to.
+    -->
+    <key name="stand"
+      qpos="
+      0 0 0.754
+      1 0 0 0
+      -0.312 0.0 0.0 0.669 -0.363 0.0
+      -0.312 0.0 0.0 0.669 -0.363 0.0
+      0.0 0.0 0.0
+      0.2  0.2 0.0 0.6 0.0 0.0 0.0
+      0.2 -0.2 0.0 0.6 0.0 0.0 0.0
+      "
+      ctrl="
+      -0.312 0.0 0.0 0.669 -0.363 0.0
+      -0.312 0.0 0.0 0.669 -0.363 0.0
+      0.0 0.0 0.0
+      0.2  0.2 0.0 0.6 0.0 0.0 0.0
+      0.2 -0.2 0.0 0.6 0.0 0.0 0.0
+      "/>
+    <!--
+      "supine" is a settled fallen pose ported from HumanUP's g1waist task
+      (simulation/legged_gym/legged_gym/envs/g1waist/g1waist_up.py,
+      G1WaistHumanUP.__init__ initial_root_states/initial_dof_pos). Root
+      quaternion reordered from Isaac Gym (x,y,z,w) to MuJoCo (w,x,y,z). Root
+      z raised from HumanUP's 0.0565 to 0.08 as a safety margin against
+      initial penetration, since this repo's G1 collision mesh differs from
+      HumanUP's simplified one; retune if the robot visibly pops/explodes
+      on reset. Wrist DOFs (last 3 of each arm) have no HumanUP source value
+      since HumanUP trains a fixed-wrist 23-DOF G1; set to 0.
+    -->
+    <key name="supine"
+      qpos="
+      0 0 0.08
+      0.8659 0.0098 -0.4999 -0.0175
+      -0.3600 0.2481 1.6115 -0.0647 -0.8612 -0.1226
+      -0.3878 0.3584 1.5328  0.1519 -0.8651  0.2362
+      -0.0357 0.0685 -0.5200
+       0.4665 0.8218  0.4253  1.2972 0.0 0.0 0.0
+       0.1429 -1.0324 -0.4241 1.4075 0.0 0.0 0.0
+      "
+      ctrl="
+      -0.3600 0.2481 1.6115 -0.0647 -0.8612 -0.1226
+      -0.3878 0.3584 1.5328  0.1519 -0.8651  0.2362
+      -0.0357 0.0685 -0.5200
+       0.4665 0.8218  0.4253  1.2972 0.0 0.0 0.0
+       0.1429 -1.0324 -0.4241 1.4075 0.0 0.0 0.0
+      "/>
+    <!--
+      "prone" (face down) ported from HumanUP's companion g1waistroll task
+      (envs/g1waistroll/g1waistroll_up.py), which reuses the exact same
+      initial_dof_pos as g1waist and only flips the root quaternion, so
+      these joint angles are identical to "supine" above, verified against
+      HumanUP source rather than guessed.
+    -->
+    <key name="prone"
+      qpos="
+      0 0 0.08
+      0.4999 0.0175 0.8659 0.0098
+      -0.3600 0.2481 1.6115 -0.0647 -0.8612 -0.1226
+      -0.3878 0.3584 1.5328  0.1519 -0.8651  0.2362
+      -0.0357 0.0685 -0.5200
+       0.4665 0.8218  0.4253  1.2972 0.0 0.0 0.0
+       0.1429 -1.0324 -0.4241 1.4075 0.0 0.0 0.0
+      "
+      ctrl="
+      -0.3600 0.2481 1.6115 -0.0647 -0.8612 -0.1226
+      -0.3878 0.3584 1.5328  0.1519 -0.8651  0.2362
+      -0.0357 0.0685 -0.5200
+       0.4665 0.8218  0.4253  1.2972 0.0 0.0 0.0
+       0.1429 -1.0324 -0.4241 1.4075 0.0 0.0 0.0
+      "/>
+  </keyframe>
+
+</mujoco>

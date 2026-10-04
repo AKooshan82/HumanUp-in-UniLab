@@ -1,3 +1,4 @@
+from .getup import G1GetupCfg, G1GetupEnv, G1GetupRewardConfig, G1RollOverCfg
 from .joystick import (
     G1WalkControlConfig,
     G1WalkEnv,
@@ -8,6 +9,10 @@ from .joystick import (
 )
 
 __all__ = [
+    "G1GetupCfg",
+    "G1GetupEnv",
+    "G1GetupRewardConfig",
+    "G1RollOverCfg",
     "G1WalkControlConfig",
     "G1WalkEnv",
     "G1WalkEnvCfg",
